@@ -7,7 +7,7 @@ from llama_index.embeddings.mistralai import MistralAIEmbedding
 from dotenv import load_dotenv
 
 # Load environment variables
-os.environ["MISTRAL_API_KEY"] = "WDtXdrmUGvwuVnXxTAhlZUZmMbXdyopZ"
+os.environ["MISTRAL_API_KEY"] = "oXT38FEFy8fgWhQmkxQqJ1UO4kZhNNK8"
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 
