@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import nest_asyncio
+import time
 from dotenv import load_dotenv
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, Settings, Document
 from llama_index.llms.mistralai import MistralAI
@@ -40,7 +41,10 @@ POLICY_URLS = {
 # Create document index for policies
 documents = [Document(text=POLICIES[name], metadata={"name": name}) for name in POLICIES]
 index = VectorStoreIndex.from_documents(documents)
-query_engine = index.as_query_engine()
+
+# Store query engine in session state to avoid re-creating it
+if "query_engine" not in st.session_state:
+    st.session_state.query_engine = index.as_query_engine()
 
 # Streamlit UI Design
 st.set_page_config(page_title="UDST Policy Assistant", layout="wide")
@@ -67,10 +71,11 @@ if user_query:
         for policy in matched_policies:
             st.markdown(f"- [{policy}]({POLICY_URLS[policy]})")
 
-        # Generate response from the query engine using the relevant policies
-        relevant_documents = [Document(text=POLICIES[name], metadata={"name": name}) for name in matched_policies]
-        relevant_query_engine = VectorStoreIndex.from_documents(relevant_documents).as_query_engine()
-        response = relevant_query_engine.query(user_query)
+        # Introduce a delay to prevent hitting the API rate limit
+        time.sleep(1)
+        
+        # Generate response using pre-built query engine
+        response = st.session_state.query_engine.query(user_query)
         
         st.write("### 🤖 AI Response:")
         st.success(response.response if response else "No relevant information found.")
